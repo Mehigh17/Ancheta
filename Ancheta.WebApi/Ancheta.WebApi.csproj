@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Ancheta.Model\Ancheta.Model.csproj" />
   </ItemGroup>
 
 </Project>
