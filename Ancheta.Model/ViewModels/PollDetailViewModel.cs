@@ -15,6 +15,6 @@ namespace Ancheta.Model.ViewModels
         public TimeSpan Duration { get; set; }
 
         public IReadOnlyList<AnswerDetailViewModel> Answers { get; set; }
-
+        
     }
 }

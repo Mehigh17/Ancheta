@@ -1,7 +1,8 @@
-using Ancheta.Model.Factories;
+using Ancheta.Model.MappingProfiles;
 using Ancheta.Model.Repositories;
 using Ancheta.Repositories;
 using Ancheta.WebApi.Contexts;
+using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -25,7 +26,7 @@ namespace Ancheta.WebApi
         {
             services.AddDbContext<ApplicationDbContext>(o => o.UseNpgsql(Configuration["Database:ConnectionString"]));
             services.AddScoped<IPollRepository, PollRepository>();
-            services.AddScoped<IViewModelFactory, ViewModelFactory>();
+            services.AddAutoMapper(typeof(ViewModelProfile));
             services.AddControllers();
         }
 
