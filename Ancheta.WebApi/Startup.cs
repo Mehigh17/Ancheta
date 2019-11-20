@@ -1,15 +1,13 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Ancheta.Model.Factories;
+using Ancheta.Model.Repositories;
+using Ancheta.Repositories;
+using Ancheta.WebApi.Contexts;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 namespace Ancheta.WebApi
 {
@@ -26,6 +24,8 @@ namespace Ancheta.WebApi
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<ApplicationDbContext>(o => o.UseNpgsql(Configuration["Database:ConnectionString"]));
+            services.AddScoped<IPollRepository, PollRepository>();
+            services.AddScoped<IViewModelFactory, ViewModelFactory>();
             services.AddControllers();
         }
 
