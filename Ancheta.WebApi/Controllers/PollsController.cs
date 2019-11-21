@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Ancheta.WebApi.Controllers
 {
     [ApiController]
+    [Produces("application/json")]
     [Route("[controller]")]
     public class PollsController : ControllerBase
     {
@@ -26,6 +27,7 @@ namespace Ancheta.WebApi.Controllers
             _pollRepository = pollRepository ?? throw new System.ArgumentNullException(nameof(pollRepository));
         }
 
+        [HttpGet]
         public async Task<IActionResult> GetPublicPolls([FromQuery] int offset, [FromQuery] int count)
         {
             if (count > _MaxPollChunk)
