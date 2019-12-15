@@ -25,9 +25,10 @@ namespace Ancheta.Repositories
             await _dbContext.SaveChangesAsync();
         }
 
-        public Task<IReadOnlyList<Poll>> GetAll()
+        public async Task<IReadOnlyList<Poll>> GetAll()
         {
-            return Task.FromResult<IReadOnlyList<Poll>>(_dbContext.Polls.ToList());
+            var polls = await _dbContext.Polls.ToListAsync();
+            return polls.AsReadOnly();
         }
 
         public async Task<Poll> GetById(Guid id)
@@ -44,13 +45,14 @@ namespace Ancheta.Repositories
         public async Task<IReadOnlyList<Poll>> GetPublicPolls(int offset, int count)
         {
             var polls = await _dbContext.Polls.Where(p => p.IsPublic)
+                                              .Where(p => p.CreatedOn + p.Duration > DateTime.Now)
                                               .Skip(offset)
                                               .Take(count)
                                               .Include(p => p.Answers)
                                               .ToListAsync();
             return polls;
         }
-
+        
         public async Task<bool> Remove(Poll poll)
         {
             var removalStatus = _dbContext.Remove(poll);
