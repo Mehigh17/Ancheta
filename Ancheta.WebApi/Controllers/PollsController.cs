@@ -123,5 +123,41 @@ namespace Ancheta.WebApi.Controllers
             return BadRequest();
         }
 
+        /// <summary>
+        /// Cast a vote on a given answer.
+        /// </summary>
+        /// <param name="pollId">The id of the poll the vote should be casted in.</param>
+        /// <param name="answerId">The id of the answer that the vote should be casted on.</param>
+        /// <returns></returns>
+        [HttpPost("cast")]
+        public async Task<IActionResult> CastVote([FromQuery] string pollId, [FromQuery] string answerId)
+        {
+            if (Guid.TryParse(pollId, out var id))
+            {
+                var poll = await _pollRepository.GetById(id);
+                if (poll == null) return NotFound();
+
+                if(Guid.TryParse(answerId, out var answId))
+                {
+                    var answer = poll.Answers.FirstOrDefault(a => a.Id.Equals(answId));
+                    if(answer == null) return NotFound();
+
+                    var vote = new Vote
+                    {
+                        Id = Guid.NewGuid(),
+                        Source = HttpContext.Connection.RemoteIpAddress,
+                        CastedOn = DateTime.Now,
+                        OwnerAnswer = answer
+                    };
+
+                    await _voteRepository.Add(vote);
+                    return Ok();
+                }
+            }
+
+            ModelState.TryAddModelError("InvaidId", "The poll or answer id is not valid.");
+            return ValidationProblem(ModelState);
+        }
+
     }
 }
