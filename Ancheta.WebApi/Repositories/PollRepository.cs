@@ -27,13 +27,17 @@ namespace Ancheta.Repositories
 
         public async Task<IReadOnlyList<Poll>> GetAll()
         {
-            var polls = await _dbContext.Polls.ToListAsync();
+            var polls = await _dbContext.Polls.Include(p => p.Answers)
+                                              .ThenInclude(a => a.Votes)
+                                              .ToListAsync();
             return polls.AsReadOnly();
         }
 
         public async Task<Poll> GetById(Guid id)
         {
-            return await _dbContext.Polls.FindAsync(id);
+            return await _dbContext.Polls.Include(p => p.Answers)
+                                         .ThenInclude(a => a.Votes)
+                                         .FirstOrDefaultAsync(p => p.Id == id);
         }
 
         /// <summary>
@@ -49,6 +53,7 @@ namespace Ancheta.Repositories
                                               .Skip(offset)
                                               .Take(count)
                                               .Include(p => p.Answers)
+                                              .ThenInclude(a => a.Votes)
                                               .ToListAsync();
             return polls;
         }
