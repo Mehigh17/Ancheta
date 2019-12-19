@@ -7,6 +7,7 @@
   <ItemGroup>
     <PackageReference Include="AUtoMapper" Version="9.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.0.0" />
+    <PackageReference Include="BCrypt.Net-Next" Version="3.2.1" />
   </ItemGroup>
 
 </Project>

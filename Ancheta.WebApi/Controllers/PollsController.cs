@@ -3,7 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Ancheta.Model.Data;
 using Ancheta.Model.Repositories;
-using Ancheta.Model.Util;
+using Ancheta.Model.Services;
 using Ancheta.Model.ViewModels;
 using Ancheta.WebApi.Model.Input;
 using AutoMapper;
@@ -20,13 +20,23 @@ namespace Ancheta.WebApi.Controllers
         private const int _MaxPollChunk = 8;
         private readonly IPollRepository _pollRepository;
         private readonly IMapper _mapper;
+        public readonly IPollService _pollService;
 
-        public PollsController(IPollRepository pollRepository, IMapper mapper)
+        public PollsController(IPollRepository pollRepository,
+                               IMapper mapper,
+                               IPollService pollService)
         {
+            _pollService = pollService ?? throw new ArgumentNullException(nameof(pollService));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _pollRepository = pollRepository ?? throw new System.ArgumentNullException(nameof(pollRepository));
         }
 
+        /// <summary>
+        /// Fetch a list of unexpired public polls.
+        /// </summary>
+        /// <param name="offset">The count of polls to ignore from the newest to oldest ones.</param>
+        /// <param name="count">The amount of polls to fetch.</param>
+        /// <returns>A list of polls.</returns>
         [HttpGet]
         public async Task<IActionResult> GetPublicPolls([FromQuery] int offset, [FromQuery] int count)
         {
@@ -49,16 +59,20 @@ namespace Ancheta.WebApi.Controllers
         [HttpDelete]
         public async Task<IActionResult> RemovePoll([FromQuery] string id, [FromQuery] string secretCode)
         {
-            var poll = await _pollRepository.GetById(Guid.Parse(id));
-            if (poll == null) return NotFound();
+            if (Guid.TryParse(id, out var pollId))
+            {
+                var poll = await _pollRepository.GetById(pollId);
+                if (poll == null) return NotFound();
 
-            var isAuthorized = BCrypt.Net.BCrypt.Verify(secretCode, poll.SecretCodeHash);
-            if (!isAuthorized) return Unauthorized();
+                var isAuthorized = _pollService.IsPasswordValid(secretCode, poll.SecretCodeHash);
+                if (!isAuthorized) return Unauthorized();
 
-            var success = await _pollRepository.Remove(poll);
-            if (success) return Ok();
+                var success = await _pollRepository.Remove(poll);
+                if (success) return Ok();
+            }
 
-            return StatusCode(500);
+            ModelState.TryAddModelError("InvaidId", "The poll id is not valid.");
+            return ValidationProblem(ModelState);
         }
 
         /// <summary>
@@ -71,7 +85,7 @@ namespace Ancheta.WebApi.Controllers
         {
             if (ModelState.IsValid)
             {
-                var secretCode = StringUtil.GetRandomString(8);
+                var secret = _pollService.GenerateSecretCode();
                 var pollId = Guid.NewGuid();
                 var poll = new Poll
                 {
@@ -80,7 +94,7 @@ namespace Ancheta.WebApi.Controllers
                     CreatedOn = DateTime.Now,
                     Duration = TimeSpan.FromDays(30.0),
                     IsPublic = model.IsPublic,
-                    SecretCodeHash = BCrypt.Net.BCrypt.HashPassword(secretCode),
+                    SecretCodeHash = secret.Item2,
                     Answers = model.Answers.Select(a => new Answer
                     {
                         Id = Guid.NewGuid(),
@@ -94,7 +108,7 @@ namespace Ancheta.WebApi.Controllers
                 var output = new PollCreatedViewModel
                 {
                     PollId = pollId.ToString(),
-                    SecretCode = secretCode
+                    SecretCode = secret.Item1
                 };
 
                 return Ok(output);

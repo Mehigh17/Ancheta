@@ -3,6 +3,7 @@ using System.IO;
 using System.Reflection;
 using Ancheta.Model.MappingProfiles;
 using Ancheta.Model.Repositories;
+using Ancheta.Model.Services;
 using Ancheta.Repositories;
 using Ancheta.WebApi.Contexts;
 using AutoMapper;
@@ -29,7 +30,10 @@ namespace Ancheta.WebApi
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<ApplicationDbContext>(o => o.UseNpgsql(Configuration["Database:ConnectionString"]));
+            
             services.AddScoped<IPollRepository, PollRepository>();
+            services.AddScoped<IPollService, PollService>();
+            
             services.AddAutoMapper(typeof(ViewModelProfile));
             services.AddControllers();
 
