@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -17,7 +18,7 @@ namespace Ancheta.Model.Data
         /// </summary>
         public Poll OwnerPoll { get; set; }
 
-        public int Votes { get; set; }
+        public List<Vote> Votes { get; set; }
 
     }
 }

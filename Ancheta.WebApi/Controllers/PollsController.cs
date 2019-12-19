@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Ancheta.Model.Data;
@@ -6,7 +7,9 @@ using Ancheta.Model.Repositories;
 using Ancheta.Model.Services;
 using Ancheta.Model.ViewModels;
 using Ancheta.WebApi.Model.Input;
+using Ancheta.WebApi.Repositories;
 using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Ancheta.WebApi.Controllers
@@ -19,16 +22,19 @@ namespace Ancheta.WebApi.Controllers
 
         private const int _MaxPollChunk = 8;
         private readonly IPollRepository _pollRepository;
+        private readonly IVoteRepository _voteRepository;
         private readonly IMapper _mapper;
         public readonly IPollService _pollService;
 
         public PollsController(IPollRepository pollRepository,
+                               IVoteRepository voteRepository,
                                IMapper mapper,
                                IPollService pollService)
         {
             _pollService = pollService ?? throw new ArgumentNullException(nameof(pollService));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _pollRepository = pollRepository ?? throw new System.ArgumentNullException(nameof(pollRepository));
+            _voteRepository = voteRepository ?? throw new ArgumentNullException(nameof(voteRepository));
         }
 
         /// <summary>
@@ -46,8 +52,9 @@ namespace Ancheta.WebApi.Controllers
                 return ValidationProblem(ModelState);
             }
 
-            var polls = (await _pollRepository.GetPublicPolls(offset, count)).Select(p => _mapper.Map<Poll, PollDetailViewModel>(p));
-            return Ok(polls);
+            var polls = await _pollRepository.GetPublicPolls(offset, count);
+            var publicPolls = polls.Select(p => _mapper.Map<Poll, PollDetailViewModel>(p));
+            return Ok(publicPolls);
         }
 
         /// <summary>
@@ -99,7 +106,7 @@ namespace Ancheta.WebApi.Controllers
                     {
                         Id = Guid.NewGuid(),
                         Content = a.Content,
-                        Votes = 0
+                        Votes = new List<Vote>()
                     }).ToList()
                 };
 

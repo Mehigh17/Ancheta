@@ -8,7 +8,8 @@ namespace Ancheta.Model.MappingProfiles
     {
         public ViewModelProfile()
         {
-            CreateMap<Answer, AnswerDetailViewModel>();
+            CreateMap<Answer, AnswerDetailViewModel>().ForMember(dest => dest.VoteCount,
+                                                                 opt => opt.MapFrom(a => a.Votes.Count));
             CreateMap<Poll, PollDetailViewModel>();
         }
     }
