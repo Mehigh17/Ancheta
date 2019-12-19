@@ -33,7 +33,7 @@ namespace Ancheta.WebApi.Controllers
             if (count > _MaxPollChunk)
             {
                 ModelState.TryAddModelError("limits", $"You can request at most {_MaxPollChunk} polls in a request.");
-                return BadRequest(ValidationProblem(ModelState));
+                return ValidationProblem(ModelState);
             }
 
             var polls = (await _pollRepository.GetPublicPolls(offset, count)).Select(p => _mapper.Map<Poll, PollDetailViewModel>(p));
