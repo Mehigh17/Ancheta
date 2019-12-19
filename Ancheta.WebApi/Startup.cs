@@ -6,6 +6,7 @@ using Ancheta.Model.Repositories;
 using Ancheta.Model.Services;
 using Ancheta.Repositories;
 using Ancheta.WebApi.Contexts;
+using Ancheta.WebApi.Repositories;
 using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -33,6 +34,7 @@ namespace Ancheta.WebApi
             
             services.AddScoped<IPollRepository, PollRepository>();
             services.AddScoped<IPollService, PollService>();
+            services.AddScoped<IVoteRepository, VoteRepository>();
             
             services.AddAutoMapper(typeof(ViewModelProfile));
             services.AddControllers();
