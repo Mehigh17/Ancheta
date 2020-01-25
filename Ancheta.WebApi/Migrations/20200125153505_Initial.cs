@@ -12,7 +12,7 @@ namespace Ancheta.WebApi.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
-                    Question = table.Column<string>(maxLength: 400, nullable: true),
+                    Question = table.Column<string>(nullable: true),
                     IsPublic = table.Column<bool>(nullable: false),
                     CreatedOn = table.Column<DateTime>(nullable: false),
                     Duration = table.Column<TimeSpan>(nullable: false),
@@ -28,9 +28,8 @@ namespace Ancheta.WebApi.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
-                    Content = table.Column<string>(maxLength: 1000, nullable: true),
-                    OwnerPollId = table.Column<Guid>(nullable: true),
-                    Votes = table.Column<int>(nullable: false)
+                    Content = table.Column<string>(nullable: true),
+                    OwnerPollId = table.Column<Guid>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -43,14 +42,42 @@ namespace Ancheta.WebApi.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Votes",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(nullable: false),
+                    OwnerAnswerId = table.Column<Guid>(nullable: true),
+                    Source = table.Column<byte[]>(nullable: true),
+                    CastedOn = table.Column<DateTime>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Votes", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Votes_Answers_OwnerAnswerId",
+                        column: x => x.OwnerAnswerId,
+                        principalTable: "Answers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Answers_OwnerPollId",
                 table: "Answers",
                 column: "OwnerPollId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Votes_OwnerAnswerId",
+                table: "Votes",
+                column: "OwnerAnswerId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "Votes");
+
             migrationBuilder.DropTable(
                 name: "Answers");
 

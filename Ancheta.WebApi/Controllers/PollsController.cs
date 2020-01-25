@@ -147,7 +147,7 @@ namespace Ancheta.WebApi.Controllers
                     var vote = new Vote
                     {
                         Id = Guid.NewGuid(),
-                        Source = HttpContext.Connection.RemoteIpAddress,
+                        Source = HttpContext.Connection.RemoteIpAddress.MapToIPv4().GetAddressBytes(),
                         CastedOn = DateTime.Now,
                         OwnerAnswer = answer
                     };

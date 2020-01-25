@@ -13,7 +13,10 @@ namespace Ancheta.Model.Data
         // The answer that his vote has been casted to.
         public Answer OwnerAnswer { get;set ;}
 
-        public IPAddress Source { get; set; }
+        /// <summary>
+        /// The IP address bytes, in IPv4 format.
+        /// </summary>
+        public byte[] Source { get; set; }
 
         public DateTime CastedOn { get; set; }
 

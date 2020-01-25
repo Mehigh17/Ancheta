@@ -10,7 +10,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Ancheta.WebApi.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20191117135239_Initial")]
+    [Migration("20200125153505_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -28,14 +28,10 @@ namespace Ancheta.WebApi.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("Content")
-                        .HasColumnType("character varying(1000)")
-                        .HasMaxLength(1000);
+                        .HasColumnType("text");
 
                     b.Property<Guid?>("OwnerPollId")
                         .HasColumnType("uuid");
-
-                    b.Property<int>("Votes")
-                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -60,8 +56,7 @@ namespace Ancheta.WebApi.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<string>("Question")
-                        .HasColumnType("character varying(400)")
-                        .HasMaxLength(400);
+                        .HasColumnType("text");
 
                     b.Property<string>("SecretCodeHash")
                         .HasColumnType("text");
@@ -71,12 +66,41 @@ namespace Ancheta.WebApi.Migrations
                     b.ToTable("Polls");
                 });
 
+            modelBuilder.Entity("Ancheta.Model.Data.Vote", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CastedOn")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<Guid?>("OwnerAnswerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<byte[]>("Source")
+                        .HasColumnType("bytea");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OwnerAnswerId");
+
+                    b.ToTable("Votes");
+                });
+
             modelBuilder.Entity("Ancheta.Model.Data.Answer", b =>
                 {
                     b.HasOne("Ancheta.Model.Data.Poll", "OwnerPoll")
                         .WithMany("Answers")
                         .HasForeignKey("OwnerPollId")
                         .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Ancheta.Model.Data.Vote", b =>
+                {
+                    b.HasOne("Ancheta.Model.Data.Answer", "OwnerAnswer")
+                        .WithMany("Votes")
+                        .HasForeignKey("OwnerAnswerId");
                 });
 #pragma warning restore 612, 618
         }
