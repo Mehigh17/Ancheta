@@ -15,6 +15,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using SharpCatch.Services;
 
 namespace Ancheta.WebApi
 {
@@ -30,11 +31,17 @@ namespace Ancheta.WebApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var captchaKey = Configuration["Recaptcha:Key"];
+
             services.AddDbContext<ApplicationDbContext>(o => o.UseNpgsql(Configuration["Database:ConnectionString"]));
             
             services.AddScoped<IPollRepository, PollRepository>();
             services.AddScoped<IPollService, PollService>();
             services.AddScoped<IVoteRepository, VoteRepository>();
+
+            services.AddTransient<IRecaptchaService, RecaptchaService>(s => {
+                return new RecaptchaService(captchaKey);
+            });
             
             services.AddAutoMapper(typeof(ViewModelProfile));
             services.AddControllers();

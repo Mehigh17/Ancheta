@@ -7,10 +7,10 @@ using Ancheta.Model.Repositories;
 using Ancheta.Model.Services;
 using Ancheta.Model.ViewModels;
 using Ancheta.WebApi.Model.Input;
-using Ancheta.WebApi.Repositories;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using SharpCatch.Asp.Filters;
 
 namespace Ancheta.WebApi.Controllers
 {
@@ -88,6 +88,7 @@ namespace Ancheta.WebApi.Controllers
         /// <param name="model">The input data for the poll.</param>
         /// <returns></returns>
         [HttpPost]
+        [RecaptchaValidation]
         public async Task<IActionResult> CreatePoll([FromBody] PollCreationModel model)
         {
             if (ModelState.IsValid)
@@ -130,6 +131,7 @@ namespace Ancheta.WebApi.Controllers
         /// <param name="answerId">The id of the answer that the vote should be casted on.</param>
         /// <returns></returns>
         [HttpPost("cast")]
+        [RecaptchaValidation]
         public async Task<IActionResult> CastVote([FromQuery] string pollId, [FromQuery] string answerId)
         {
             if (Guid.TryParse(pollId, out var id))
