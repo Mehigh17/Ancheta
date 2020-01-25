@@ -20,6 +20,8 @@ namespace Ancheta.Model.Data
 
         public TimeSpan Duration { get; set; }
 
+        public bool AllowMultipleVotesPerIp { get; set; }
+
         public string SecretCodeHash { get; set; }
 
     }

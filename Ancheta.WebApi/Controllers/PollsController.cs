@@ -103,6 +103,7 @@ namespace Ancheta.WebApi.Controllers
                     Duration = TimeSpan.FromDays(30.0),
                     IsPublic = model.IsPublic,
                     SecretCodeHash = secret.Item2,
+                    AllowMultipleVotesPerIp = model.AllowMultipleVotesPerIp,
                     Answers = model.Answers.Select(a => new Answer
                     {
                         Id = Guid.NewGuid(),
@@ -129,9 +130,14 @@ namespace Ancheta.WebApi.Controllers
         /// </summary>
         /// <param name="pollId">The id of the poll the vote should be casted in.</param>
         /// <param name="answerId">The id of the answer that the vote should be casted on.</param>
+        /// <response code="200">The vote has been casted successfully.</response>   
+        /// <response code="401">The model information, such as poll id or answer id is not valid.</response>   
+        /// <response code="403">If the user has already voted before.</response>
+        /// <response code="404">If the poll or answer are not found.</response>
         /// <returns></returns>
         [HttpPost("cast")]
         [RecaptchaValidation]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> CastVote([FromQuery] string pollId, [FromQuery] string answerId)
         {
             if (Guid.TryParse(pollId, out var id))
@@ -139,10 +145,20 @@ namespace Ancheta.WebApi.Controllers
                 var poll = await _pollRepository.GetById(id);
                 if (poll == null) return NotFound();
 
-                if(Guid.TryParse(answerId, out var answId))
+                if (!poll.AllowMultipleVotesPerIp)
+                {
+                    var votes = poll.Answers.SelectMany(s => s.Votes);
+                    var sourceIpBytes = HttpContext.Connection.RemoteIpAddress.MapToIPv4().GetAddressBytes();
+                    if (votes.FirstOrDefault(v => v.Source.SequenceEqual(sourceIpBytes)) != null)
+                    {
+                        return StatusCode(StatusCodes.Status403Forbidden);
+                    }
+                }
+
+                if (Guid.TryParse(answerId, out var answId))
                 {
                     var answer = poll.Answers.FirstOrDefault(a => a.Id.Equals(answId));
-                    if(answer == null) return NotFound();
+                    if (answer == null) return NotFound();
 
                     var vote = new Vote
                     {

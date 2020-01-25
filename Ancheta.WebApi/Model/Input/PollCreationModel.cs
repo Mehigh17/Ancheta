@@ -20,7 +20,9 @@ namespace Ancheta.WebApi.Model.Input
         /// </summary>
         [Range(3600, 3600 * 24 * 30, ErrorMessage = "The duration should be between 1 hour and 30 days.")]
         public int Duration { get; set; }
-
+        
+        public bool AllowMultipleVotesPerIp { get; set; }
+        
         public bool IsPublic { get; set; }
 
     }
