@@ -34,17 +34,22 @@ namespace Ancheta.WebApi
             var captchaKey = Configuration["Recaptcha:Key"];
 
             services.AddDbContext<ApplicationDbContext>(o => o.UseNpgsql(Configuration["Database:ConnectionString"]));
-            
+
             services.AddScoped<IPollRepository, PollRepository>();
             services.AddScoped<IPollService, PollService>();
             services.AddScoped<IVoteRepository, VoteRepository>();
 
-            services.AddTransient<IRecaptchaService, RecaptchaService>(s => {
+            services.AddTransient<IRecaptchaService, RecaptchaService>(s =>
+            {
                 return new RecaptchaService(captchaKey);
             });
-            
+
             services.AddAutoMapper(typeof(ViewModelProfile));
             services.AddControllers();
+            services.AddRouting(o =>
+            {
+                o.LowercaseUrls = true;
+            });
 
             services.AddSwaggerGen(c =>
             {
