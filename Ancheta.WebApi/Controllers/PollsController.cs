@@ -42,6 +42,8 @@ namespace Ancheta.WebApi.Controllers
         /// </summary>
         /// <param name="offset">The count of polls to ignore from the newest to oldest ones.</param>
         /// <param name="count">The amount of polls to fetch.</param>
+        /// <response code="200">A list of polls.</response>
+        /// <response code="400">If the limits or the bounds are invalid.</response>
         /// <returns>A list of polls.</returns>
         [HttpGet]
         public async Task<IActionResult> GetPublicPolls([FromQuery] int offset, [FromQuery] int count)
@@ -62,6 +64,9 @@ namespace Ancheta.WebApi.Controllers
         /// </summary>
         /// <param name="id">Id of the poll.</param>
         /// <param name="secretCode">Secret code required to manage the poll.</param>
+        /// <response code="200">If the poll has been removed.</response>
+        /// <response code="401">If the secret code is not valid.</response>
+        /// <response code="404">If the poll has not been found in the database.</response>
         /// <returns></returns>
         [HttpDelete]
         public async Task<IActionResult> RemovePoll([FromQuery] string id, [FromQuery] string secretCode)
@@ -86,6 +91,8 @@ namespace Ancheta.WebApi.Controllers
         /// Create a poll.
         /// </summary>
         /// <param name="model">The input data for the poll.</param>
+        /// <response code="200">Returns the successfully created poll.</response>   
+        /// <response code="400">The model information is invalid.</response>
         /// <returns></returns>
         [HttpPost]
         [RecaptchaValidation]
@@ -131,13 +138,12 @@ namespace Ancheta.WebApi.Controllers
         /// <param name="pollId">The id of the poll the vote should be casted in.</param>
         /// <param name="answerId">The id of the answer that the vote should be casted on.</param>
         /// <response code="200">The vote has been casted successfully.</response>   
-        /// <response code="401">The model information, such as poll id or answer id is not valid.</response>   
+        /// <response code="400">The model information, such as poll id or answer id is not valid.</response>   
         /// <response code="403">If the user has already voted before.</response>
         /// <response code="404">If the poll or answer are not found.</response>
         /// <returns></returns>
         [HttpPost("cast")]
         [RecaptchaValidation]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> CastVote([FromQuery] string pollId, [FromQuery] string answerId)
         {
             if (Guid.TryParse(pollId, out var id))
