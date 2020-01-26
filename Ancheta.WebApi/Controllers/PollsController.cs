@@ -46,7 +46,7 @@ namespace Ancheta.WebApi.Controllers
         /// <response code="400">If the limits or the bounds are invalid.</response>
         /// <returns>A list of polls.</returns>
         [HttpGet]
-        public async Task<IActionResult> GetPublicPolls([FromQuery] int offset, [FromQuery] int count)
+        public async Task<ActionResult<IList<PollDetailViewModel>>> GetPublicPolls([FromQuery] int offset, [FromQuery] int count)
         {
             if (count > _MaxPollChunk)
             {
@@ -56,7 +56,7 @@ namespace Ancheta.WebApi.Controllers
 
             var polls = await _pollRepository.GetPublicPolls(offset, count);
             var publicPolls = polls.Select(p => _mapper.Map<Poll, PollDetailViewModel>(p));
-            return Ok(publicPolls);
+            return publicPolls.ToList();
         }
 
         /// <summary>
@@ -96,7 +96,7 @@ namespace Ancheta.WebApi.Controllers
         /// <returns></returns>
         [HttpPost]
         [RecaptchaValidation]
-        public async Task<IActionResult> CreatePoll([FromBody] PollCreationModel model)
+        public async Task<ActionResult<PollCreatedViewModel>> CreatePoll([FromBody] PollCreationModel model)
         {
             if (ModelState.IsValid)
             {
