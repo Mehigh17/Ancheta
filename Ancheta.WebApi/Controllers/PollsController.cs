@@ -142,9 +142,9 @@ namespace Ancheta.WebApi.Controllers
         /// <response code="403">If the user has already voted before.</response>
         /// <response code="404">If the poll or answer are not found.</response>
         /// <returns></returns>
-        [HttpPost("vote")]
+        [HttpPost("{pollId}/votes")]
         [RecaptchaValidation]
-        public async Task<IActionResult> CastVote([FromQuery] string pollId, [FromQuery] string answerId)
+        public async Task<IActionResult> CastVote([FromRoute] string pollId, [FromQuery] string answerId)
         {
             if (Guid.TryParse(pollId, out var id))
             {
