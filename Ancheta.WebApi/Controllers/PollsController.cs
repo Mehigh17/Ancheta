@@ -129,7 +129,7 @@ namespace Ancheta.WebApi.Controllers
                     Id = pollId,
                     Question = model.Question,
                     CreatedOn = DateTime.Now,
-                    Duration = TimeSpan.FromDays(30.0),
+                    Duration = model.Duration.HasValue ? TimeSpan.FromSeconds(model.Duration.Value) : default(TimeSpan?),
                     IsPublic = model.IsPublic,
                     SecretCodeHash = secret.Item2,
                     AllowMultipleVotesPerIp = model.AllowMultipleVotesPerIp,

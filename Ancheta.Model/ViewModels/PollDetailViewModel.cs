@@ -12,7 +12,7 @@ namespace Ancheta.Model.ViewModels
 
         public DateTime CreatedOn { get; set; }
 
-        public TimeSpan Duration { get; set; }
+        public TimeSpan? Duration { get; set; }
 
         public IReadOnlyList<AnswerDetailViewModel> Answers { get; set; }
         

@@ -16,10 +16,10 @@ namespace Ancheta.WebApi.Model.Input
         public AnswerModel[] Answers { get; set; }
 
         /// <summary>
-        /// Duration in seconds.
+        /// Duration in seconds, null for infinite duration.
         /// </summary>
-        [Range(3600, 3600 * 24 * 30, ErrorMessage = "The duration should be between 1 hour and 30 days.")]
-        public int Duration { get; set; }
+        [Range(60 * 30, int.MaxValue, ErrorMessage = "The duration of the poll must be at least 30 minutes.")]
+        public int? Duration { get; set; }
         
         public bool AllowMultipleVotesPerIp { get; set; }
         

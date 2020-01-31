@@ -18,7 +18,7 @@ namespace Ancheta.Model.Data
 
         public DateTime CreatedOn { get; set; }
 
-        public TimeSpan Duration { get; set; }
+        public TimeSpan? Duration { get; set; }
 
         public bool AllowMultipleVotesPerIp { get; set; }
 
