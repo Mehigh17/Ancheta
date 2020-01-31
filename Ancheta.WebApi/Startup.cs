@@ -31,9 +31,10 @@ namespace Ancheta.WebApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            var captchaKey = Configuration["Recaptcha:Key"];
+            var captchaKey = Configuration["Recaptcha:Key"] ?? throw new ArgumentNullException("The captcha key cannot be null.");
+            var connectionString = Configuration["Database:ConnectionString"] ?? throw new ArgumentException("The connection string cannot be null.");
 
-            services.AddDbContext<ApplicationDbContext>(o => o.UseNpgsql(Configuration["Database:ConnectionString"]));
+            services.AddDbContext<ApplicationDbContext>(o => o.UseNpgsql(connectionString));
 
             services.AddScoped<IPollRepository, PollRepository>();
             services.AddScoped<IPollService, PollService>();
