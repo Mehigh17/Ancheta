@@ -60,6 +60,28 @@ namespace Ancheta.WebApi.Controllers
         }
 
         /// <summary>
+        /// Fetch a poll with given id.
+        /// </summary>
+        /// <param name="pollId">The id of the poll to be fetched.</param>
+        /// <response code="200">Returns a poll.</response>
+        /// <response code="400">If poll id has invalid format.</response>
+        /// <response code="404">If poll has not been found.</response>
+        /// <returns>A poll.</returns>
+        [HttpGet("{pollId}")]
+        public async Task<ActionResult<PollDetailViewModel>> GetPoll([FromRoute] string pollId)
+        {
+            if (Guid.TryParse(pollId, out var pid))
+            {
+                var poll = await _pollRepository.GetById(pid);
+                if(poll is null) return NotFound();
+
+                var pollVm = _mapper.Map<Poll, PollDetailViewModel>(poll);
+                return pollVm;
+            }
+            return BadRequest();
+        }
+
+        /// <summary>
         /// Permanently remove a poll from the database.
         /// </summary>
         /// <param name="id">Id of the poll.</param>
