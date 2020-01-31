@@ -42,7 +42,7 @@ namespace Ancheta.WebApi.Controllers
         /// </summary>
         /// <param name="offset">The count of polls to ignore from the newest to oldest ones.</param>
         /// <param name="count">The amount of polls to fetch.</param>
-        /// <response code="200">A list of polls.</response>
+        /// <response code="200">Returns a list of polls.</response>
         /// <response code="400">If the limits or the bounds are invalid.</response>
         /// <returns>A list of polls.</returns>
         [HttpGet]
@@ -86,8 +86,9 @@ namespace Ancheta.WebApi.Controllers
         /// </summary>
         /// <param name="id">Id of the poll.</param>
         /// <param name="secretCode">Secret code required to manage the poll.</param>
-        /// <response code="200">If the poll has been removed.</response>
+        /// <response code="200">The poll has been removed.</response>
         /// <response code="401">If the secret code is not valid.</response>
+        /// <response code="400">If the poll id has invalid format.</response>
         /// <response code="404">If the poll has not been found in the database.</response>
         /// <returns></returns>
         [HttpDelete]
@@ -105,8 +106,7 @@ namespace Ancheta.WebApi.Controllers
                 if (success) return Ok();
             }
 
-            ModelState.TryAddModelError("InvaidId", "The poll id is not valid.");
-            return ValidationProblem(ModelState);
+            return BadRequest();
         }
 
         /// <summary>
@@ -114,7 +114,7 @@ namespace Ancheta.WebApi.Controllers
         /// </summary>
         /// <param name="model">The input data for the poll.</param>
         /// <response code="200">Returns the successfully created poll.</response>   
-        /// <response code="400">The model information is invalid.</response>
+        /// <response code="400">If the model information is invalid.</response>
         /// <returns></returns>
         [HttpPost]
         [RecaptchaValidation]
@@ -160,7 +160,7 @@ namespace Ancheta.WebApi.Controllers
         /// <param name="pollId">The id of the poll the vote should be casted in.</param>
         /// <param name="answerId">The id of the answer that the vote should be casted on.</param>
         /// <response code="200">The vote has been casted successfully.</response>   
-        /// <response code="400">The model information, such as poll id or answer id is not valid.</response>   
+        /// <response code="400">If the poll or answer id are in invalid formats.</response>   
         /// <response code="403">If the user has already voted before.</response>
         /// <response code="404">If the poll or answer are not found.</response>
         /// <returns></returns>
@@ -203,8 +203,7 @@ namespace Ancheta.WebApi.Controllers
                 }
             }
 
-            ModelState.TryAddModelError("InvaidId", "The poll or answer id is not valid.");
-            return ValidationProblem(ModelState);
+            return BadRequest();
         }
 
     }
