@@ -58,6 +58,17 @@ namespace Ancheta.WebApi
                 {
                     Title = "Ancheta",
                     Version = "v1",
+                    License = new OpenApiLicense
+                    {
+                        Name = "MIT",
+                        Url = new Uri("https://www.mit.edu/~amini/LICENSE.md"),
+                    },
+                    Description = "Ancheta is a piece of software allowing users to create, manage and vote on polls.",
+                    Contact = new OpenApiContact
+                    {
+                        Name = "Github Repository",
+                        Url = new Uri("https://github.com/Mehigh17/Ancheta"),
+                    },
                 });
 
                 // Set the comments path for the Swagger JSON and UI.
