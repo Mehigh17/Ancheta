@@ -142,7 +142,7 @@ namespace Ancheta.WebApi.Controllers
         /// <response code="403">If the user has already voted before.</response>
         /// <response code="404">If the poll or answer are not found.</response>
         /// <returns></returns>
-        [HttpPost("cast")]
+        [HttpPost("vote")]
         [RecaptchaValidation]
         public async Task<IActionResult> CastVote([FromQuery] string pollId, [FromQuery] string answerId)
         {
@@ -151,10 +151,12 @@ namespace Ancheta.WebApi.Controllers
                 var poll = await _pollRepository.GetById(id);
                 if (poll == null) return NotFound();
 
+                var addressBytes = HttpContext.Connection.RemoteIpAddress.MapToIPv4().GetAddressBytes();
+
                 if (!poll.AllowMultipleVotesPerIp)
                 {
                     var votes = poll.Answers.SelectMany(s => s.Votes);
-                    var sourceIpBytes = HttpContext.Connection.RemoteIpAddress.MapToIPv4().GetAddressBytes();
+                    var sourceIpBytes = addressBytes;
                     if (votes.FirstOrDefault(v => v.Source.SequenceEqual(sourceIpBytes)) != null)
                     {
                         return StatusCode(StatusCodes.Status403Forbidden);
@@ -169,7 +171,7 @@ namespace Ancheta.WebApi.Controllers
                     var vote = new Vote
                     {
                         Id = Guid.NewGuid(),
-                        Source = HttpContext.Connection.RemoteIpAddress.MapToIPv4().GetAddressBytes(),
+                        Source = addressBytes,
                         CastedOn = DateTime.Now,
                         OwnerAnswer = answer
                     };
