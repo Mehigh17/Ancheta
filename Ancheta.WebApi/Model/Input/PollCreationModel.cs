@@ -13,6 +13,7 @@ namespace Ancheta.WebApi.Model.Input
 
         [Required(ErrorMessage = "You need to provide at least a couple of options.")]
         [MinLength(2, ErrorMessage = "At least two answers are required.")]
+        [MaxLength(20, ErrorMessage = "You cannot have more than 20 answers.")]
         public AnswerModel[] Answers { get; set; }
 
         /// <summary>
