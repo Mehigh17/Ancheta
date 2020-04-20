@@ -59,7 +59,7 @@ CONNECTION_STRING=User ID=dbuser;Password=dbpass;Host=db;Port=5432;Database=anch
 
 # Swagger
 
-Swagger is a perfect tool for you to explore the API. Ancheta **must** run in development mode in order for Swagger to be available.
+Swagger is a perfect tool for you to explore the API. Ancheta **must** run in development mode in order for Swagger to be available. Swagger is going to be available at `{host}/swagger`.
 
 To set Ancheta in development mode use `ASPNETCORE_ENVIRONMENT=Development`.
 
