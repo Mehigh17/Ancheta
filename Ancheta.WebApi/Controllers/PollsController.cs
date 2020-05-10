@@ -24,7 +24,7 @@ namespace Ancheta.WebApi.Controllers
         private readonly IPollRepository _pollRepository;
         private readonly IVoteRepository _voteRepository;
         private readonly IMapper _mapper;
-        public readonly IPollService _pollService;
+        private readonly IPollService _pollService;
 
         public PollsController(IPollRepository pollRepository,
                                IVoteRepository voteRepository,
