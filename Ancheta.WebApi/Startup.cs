@@ -39,11 +39,9 @@ namespace Ancheta.WebApi
             services.AddScoped<IPollRepository, PollRepository>();
             services.AddScoped<IPollService, PollService>();
             services.AddScoped<IVoteRepository, VoteRepository>();
+            services.AddSingleton<ITinyMessengerHub, TinyMessengerHub>();
 
-            services.AddTransient<IRecaptchaService, RecaptchaService>(s =>
-            {
-                return new RecaptchaService(captchaKey);
-            });
+            services.AddTransient<IRecaptchaService, RecaptchaService>(_ => new RecaptchaService(captchaKey));
 
             services.AddAutoMapper(typeof(ViewModelProfile));
             services.AddControllers();
