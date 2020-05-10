@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Ancheta.Model.Data;
+using Ancheta.Model.Messages;
 using Ancheta.Model.Repositories;
 using Ancheta.Model.Services;
 using Ancheta.Model.ViewModels;
@@ -25,16 +26,19 @@ namespace Ancheta.WebApi.Controllers
         private readonly IVoteRepository _voteRepository;
         private readonly IMapper _mapper;
         private readonly IPollService _pollService;
+        private readonly ITinyMessengerHub _messengerHub;
 
         public PollsController(IPollRepository pollRepository,
                                IVoteRepository voteRepository,
                                IMapper mapper,
-                               IPollService pollService)
+                               IPollService pollService,
+                               ITinyMessengerHub messengerHub)
         {
             _pollService = pollService ?? throw new ArgumentNullException(nameof(pollService));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-            _pollRepository = pollRepository ?? throw new System.ArgumentNullException(nameof(pollRepository));
+            _pollRepository = pollRepository ?? throw new ArgumentNullException(nameof(pollRepository));
             _voteRepository = voteRepository ?? throw new ArgumentNullException(nameof(voteRepository));
+            _messengerHub = messengerHub ?? throw new ArgumentNullException(nameof(messengerHub));
         }
 
         /// <summary>
@@ -73,7 +77,7 @@ namespace Ancheta.WebApi.Controllers
             if (Guid.TryParse(pollId, out var pid))
             {
                 var poll = await _pollRepository.GetById(pid);
-                if(poll is null) return NotFound();
+                if (poll is null) return NotFound();
 
                 var pollVm = _mapper.Map<Poll, PollDetailViewModel>(poll);
                 return pollVm;
@@ -199,6 +203,9 @@ namespace Ancheta.WebApi.Controllers
                     };
 
                     await _voteRepository.Add(vote);
+
+                    _messengerHub.Publish(new VoteCastedMessage(pollId, vote));
+
                     return Ok();
                 }
             }
