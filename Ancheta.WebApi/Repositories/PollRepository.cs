@@ -41,15 +41,16 @@ namespace Ancheta.Repositories
         }
 
         /// <summary>
-        /// Fetches polls within given bounds that are marked as public.
+        /// Fetches polls within given bounds that are marked as public. Ordered from the most recent to the oldest.
         /// </summary>
         /// <param name="offset">The offset from the first poll in the database.</param>
         /// <param name="count">The amount of polls to take.</param>
-        /// <returns></returns>
+        /// <returns>A list of polls.</returns>
         public async Task<IReadOnlyList<Poll>> GetPublicPolls(int offset, int count)
         {
             var polls = await _dbContext.Polls.Where(p => p.IsPublic)
                                               .Where(p => p.Duration == null || p.CreatedOn + p.Duration > DateTime.Now)
+                                              .OrderByDescending(p => p.CreatedOn)
                                               .Skip(offset)
                                               .Take(count)
                                               .Include(p => p.Answers)
