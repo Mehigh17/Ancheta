@@ -12,13 +12,13 @@ namespace Ancheta.Model.Repositories
     public interface IRepository<TEntity, TId>
     {
         Task Add(TEntity entity);
-        
-        Task<bool> Delete(TEntity entity);
-        Task<bool> DeteleById(TId id);
+
+        Task Delete(TEntity entity);
+        Task DeleteById(TId id);
 
         Task<IReadOnlyList<TEntity>> GetAll();
         Task<TEntity> GetById(TId id);
 
-        Task<bool> Update(TEntity entity);
+        Task Update(TEntity entity);
     }
 }

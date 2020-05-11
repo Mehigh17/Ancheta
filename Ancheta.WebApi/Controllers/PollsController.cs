@@ -106,8 +106,8 @@ namespace Ancheta.WebApi.Controllers
                 var isAuthorized = _pollService.IsPasswordValid(secretCode, poll.SecretCodeHash);
                 if (!isAuthorized) return Unauthorized();
 
-                var success = await _pollRepository.Delete(poll);
-                if (success) return Ok();
+                await _pollRepository.Delete(poll);
+                return Ok();
             }
 
             return BadRequest();

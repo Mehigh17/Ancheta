@@ -59,28 +59,19 @@ namespace Ancheta.Repositories
             return polls;
         }
 
-        public async Task<bool> Delete(Poll poll)
+        public async Task Delete(Poll poll)
         {
-            var removalStatus = _dbContext.Remove(poll);
+            _dbContext.Remove(poll);
             await _dbContext.SaveChangesAsync();
-
-            var isDeleted = removalStatus.State == EntityState.Deleted || removalStatus.State == EntityState.Detached;
-            return isDeleted;
         }
 
-        public async Task<bool> DeteleById(Guid id)
-        {
-            var poll = await GetById(id);
-            if(poll == null) return true;
-            
-            return await Delete(poll);
-        }
-
-        public async Task<bool> DeleteById(Guid id)
+        public async Task DeleteById(Guid id)
         {
             var poll = await _dbContext.Polls.FindAsync(id);
-            if (poll != null) return await Delete(poll);
-            return true;
+            if (poll != null)
+            {
+                await Delete(poll);
+            }
         }
 
         /// <summary>
@@ -88,12 +79,10 @@ namespace Ancheta.Repositories
         /// </summary>
         /// <param name="poll"></param>
         /// <returns></returns>
-        public async Task<bool> Update(Poll poll)
+        public async Task Update(Poll poll)
         {
-            var state = _dbContext.Polls.Update(poll);
+            _dbContext.Polls.Update(poll);
             await _dbContext.SaveChangesAsync();
-
-            return state.State == EntityState.Modified;
         }
     }
 }

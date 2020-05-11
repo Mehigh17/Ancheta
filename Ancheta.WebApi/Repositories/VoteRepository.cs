@@ -15,7 +15,7 @@ namespace Ancheta.WebApi.Repositories
 
         public VoteRepository(ApplicationDbContext dbContext)
         {
-            _dbContext = dbContext ?? throw new System.ArgumentNullException(nameof(dbContext));
+            _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         }
 
         public async Task Add(Vote entity)
@@ -24,18 +24,16 @@ namespace Ancheta.WebApi.Repositories
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task<bool> Delete(Vote entity)
+        public async Task Delete(Vote entity)
         {
-            var state = _dbContext.Votes.Remove(entity);
+            _dbContext.Votes.Remove(entity);
             await _dbContext.SaveChangesAsync();
-
-            return state.State == EntityState.Deleted || state.State == EntityState.Detached;
         }
 
-        public async Task<bool> DeteleById(Guid id)
+        public async Task DeleteById(Guid id)
         {
             var vote = await GetById(id);
-            return await Delete(vote);
+            await Delete(vote);
         }
 
         public async Task<IReadOnlyList<Vote>> GetAll()
@@ -48,12 +46,10 @@ namespace Ancheta.WebApi.Repositories
             return await _dbContext.Votes.FindAsync(id);
         }
 
-        public async Task<bool> Update(Vote entity)
+        public async Task Update(Vote entity)
         {
-            var state = _dbContext.Votes.Update(entity);
+            _dbContext.Votes.Update(entity);
             await _dbContext.SaveChangesAsync();
-
-            return state.State == EntityState.Modified;
         }
     }
 }
