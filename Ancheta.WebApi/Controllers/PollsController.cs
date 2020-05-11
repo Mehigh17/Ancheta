@@ -204,7 +204,7 @@ namespace Ancheta.WebApi.Controllers
 
                     await _voteRepository.Add(vote);
 
-                    _messengerHub.Publish(new VoteCastedMessage(pollId, vote));
+                    _messengerHub.Publish(new VoteCastedMessage(poll.Id, answer.Id));
 
                     return Ok();
                 }
