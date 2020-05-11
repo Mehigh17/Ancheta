@@ -13,6 +13,14 @@ RECAPTCHA__KEY=... your key here ...
 DATABASE__CONNECTIONSTRING=... postgresql connection string ...
 ```
 
+# Real-time Updates
+
+Ancheta offers a SignalR hub where clients can subscribe to a poll events, such as when a vote is casted a procedure is invoked on the client side. This allows the client to have a dynamic interface properly without implementing extra steps such as periodic polling to the server.
+
+The exposed hub methods are in [NotificationsHub](Ancheta.WebApi/Hubs/NotificationsHub.cs). The procedures invoked on the client side hub can be found in [INotificationsClient](Ancheta.WebApi/Hubs/INotificationsClient.cs).
+
+The hub endpoint is `/notificationshub`.
+
 # Docker
 
 ## Docker Image
