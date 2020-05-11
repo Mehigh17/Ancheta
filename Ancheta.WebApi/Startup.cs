@@ -6,7 +6,9 @@ using Ancheta.Model.Repositories;
 using Ancheta.Model.Services;
 using Ancheta.Repositories;
 using Ancheta.WebApi.Contexts;
+using Ancheta.WebApi.Hubs;
 using Ancheta.WebApi.Repositories;
+using Ancheta.WebApi.Services;
 using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -42,6 +44,7 @@ namespace Ancheta.WebApi
             services.AddSingleton<ITinyMessengerHub, TinyMessengerHub>();
 
             services.AddTransient<IRecaptchaService, RecaptchaService>(_ => new RecaptchaService(captchaKey));
+            services.AddHostedService<NotificationsService>();
 
             services.AddAutoMapper(typeof(ViewModelProfile));
             services.AddControllers();
@@ -105,6 +108,7 @@ namespace Ancheta.WebApi
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHub<NotificationsHub>("/notificationshub");
             });
         }
     }
