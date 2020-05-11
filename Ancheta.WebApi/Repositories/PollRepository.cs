@@ -49,7 +49,7 @@ namespace Ancheta.Repositories
         public async Task<IReadOnlyList<Poll>> GetPublicPolls(int offset, int count)
         {
             var polls = await _dbContext.Polls.Where(p => p.IsPublic)
-                                              .Where(p => p.CreatedOn + p.Duration > DateTime.Now)
+                                              .Where(p => p.Duration == null || p.CreatedOn + p.Duration > DateTime.Now)
                                               .Skip(offset)
                                               .Take(count)
                                               .Include(p => p.Answers)
