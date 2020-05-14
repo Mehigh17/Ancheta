@@ -17,7 +17,7 @@ namespace Ancheta.WebApi.Controllers
 {
     [ApiController]
     [Produces("application/json")]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class PollsController : ControllerBase
     {
 
