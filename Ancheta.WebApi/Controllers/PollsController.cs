@@ -88,19 +88,19 @@ namespace Ancheta.WebApi.Controllers
         /// <summary>
         /// Permanently remove a poll from the database.
         /// </summary>
-        /// <param name="id">Id of the poll.</param>
+        /// <param name="pollId">The id of the poll to be removed.</param>
         /// <param name="secretCode">Secret code required to manage the poll.</param>
         /// <response code="200">The poll has been removed.</response>
         /// <response code="401">If the secret code is not valid.</response>
         /// <response code="400">If the poll id has invalid format.</response>
         /// <response code="404">If the poll has not been found in the database.</response>
         /// <returns></returns>
-        [HttpDelete]
-        public async Task<IActionResult> RemovePoll([FromQuery] string id, [FromQuery] string secretCode)
+        [HttpDelete("{pollId}")]
+        public async Task<IActionResult> RemovePoll([FromRoute] string pollId, [FromQuery] string secretCode)
         {
-            if (Guid.TryParse(id, out var pollId))
+            if (Guid.TryParse(pollId, out var id))
             {
-                var poll = await _pollRepository.GetById(pollId);
+                var poll = await _pollRepository.GetById(id);
                 if (poll == null) return NotFound();
 
                 var isAuthorized = _pollService.IsPasswordValid(secretCode, poll.SecretCodeHash);
