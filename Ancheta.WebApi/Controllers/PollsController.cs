@@ -21,7 +21,7 @@ namespace Ancheta.WebApi.Controllers
     public class PollsController : ControllerBase
     {
 
-        private const int _MaxPollChunk = 8;
+        private const int MaxPollChunk = 8;
         private readonly IPollRepository _pollRepository;
         private readonly IVoteRepository _voteRepository;
         private readonly IMapper _mapper;
@@ -52,9 +52,9 @@ namespace Ancheta.WebApi.Controllers
         [HttpGet]
         public async Task<ActionResult<IList<PollDetailViewModel>>> GetPublicPolls([FromQuery] int offset, [FromQuery] int count)
         {
-            if (count > _MaxPollChunk)
+            if (count > MaxPollChunk)
             {
-                ModelState.TryAddModelError("limits", $"You can request at most {_MaxPollChunk} polls in a request.");
+                ModelState.TryAddModelError("limits", $"You can request at most {MaxPollChunk} polls in a request.");
                 return ValidationProblem(ModelState);
             }
 
@@ -74,15 +74,20 @@ namespace Ancheta.WebApi.Controllers
         [HttpGet("{pollId}")]
         public async Task<ActionResult<PollDetailViewModel>> GetPoll([FromRoute] string pollId)
         {
-            if (Guid.TryParse(pollId, out var pid))
+            if (!Guid.TryParse(pollId, out var pid))
             {
-                var poll = await _pollRepository.GetById(pid);
-                if (poll is null) return NotFound();
-
-                var pollVm = _mapper.Map<Poll, PollDetailViewModel>(poll);
-                return pollVm;
+                ModelState.TryAddModelError("ParsingError", $"Poll ID {pollId} is not valid.");
+                return BadRequest(ModelState);
             }
-            return BadRequest();
+
+            var poll = await _pollRepository.GetById(pid);
+            if (poll == null)
+            {
+                return NotFound();
+            }
+
+            var pollVm = _mapper.Map<Poll, PollDetailViewModel>(poll);
+            return pollVm;
         }
 
         /// <summary>
@@ -98,19 +103,26 @@ namespace Ancheta.WebApi.Controllers
         [HttpDelete("{pollId}")]
         public async Task<IActionResult> RemovePoll([FromRoute] string pollId, [FromQuery] string secretCode)
         {
-            if (Guid.TryParse(pollId, out var id))
+            if (!Guid.TryParse(pollId, out var id))
             {
-                var poll = await _pollRepository.GetById(id);
-                if (poll == null) return NotFound();
-
-                var isAuthorized = _pollService.IsPasswordValid(secretCode, poll.SecretCodeHash);
-                if (!isAuthorized) return Unauthorized();
-
-                await _pollRepository.Delete(poll);
-                return Ok();
+                ModelState.TryAddModelError("ParsingError", $"Poll ID {pollId} is not valid.");
+                return BadRequest(ModelState);
             }
 
-            return BadRequest();
+            var poll = await _pollRepository.GetById(id);
+            if (poll == null)
+            {
+                return NotFound();
+            }
+
+            var isAuthorized = _pollService.IsPasswordValid(secretCode, poll.SecretCodeHash);
+            if (!isAuthorized)
+            {
+                return Unauthorized();
+            }
+
+            await _pollRepository.Delete(poll);
+            return Ok();
         }
 
         /// <summary>
@@ -124,38 +136,39 @@ namespace Ancheta.WebApi.Controllers
         [RecaptchaValidation]
         public async Task<ActionResult<PollCreatedViewModel>> CreatePoll([FromBody] PollCreationModel model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                var secret = _pollService.GenerateSecretCode();
-                var pollId = Guid.NewGuid();
-                var poll = new Poll
-                {
-                    Id = pollId,
-                    Question = model.Question,
-                    CreatedOn = DateTime.Now,
-                    Duration = model.Duration.HasValue ? TimeSpan.FromSeconds(model.Duration.Value) : default(TimeSpan?),
-                    IsPublic = model.IsPublic,
-                    SecretCodeHash = secret.Item2,
-                    AllowMultipleVotesPerIp = model.AllowMultipleVotesPerIp,
-                    Answers = model.Answers.Select(a => new Answer
-                    {
-                        Id = Guid.NewGuid(),
-                        Content = a.Content,
-                        Votes = new List<Vote>()
-                    }).ToList()
-                };
-
-                await _pollRepository.Add(poll);
-
-                var output = new PollCreatedViewModel
-                {
-                    PollId = pollId.ToString(),
-                    SecretCode = secret.Item1
-                };
-
-                return Ok(output);
+                return BadRequest(ModelState);
             }
-            return BadRequest();
+
+            var secret = _pollService.GenerateSecretCode();
+            var pollId = Guid.NewGuid();
+            var poll = new Poll
+            {
+                Id = pollId,
+                Question = model.Question,
+                CreatedOn = DateTime.Now,
+                Duration = model.Duration.HasValue ? TimeSpan.FromSeconds(model.Duration.Value) : default(TimeSpan?),
+                IsPublic = model.IsPublic,
+                SecretCodeHash = secret.Item2,
+                AllowMultipleVotesPerIp = model.AllowMultipleVotesPerIp,
+                Answers = model.Answers.Select(a => new Answer
+                {
+                    Id = Guid.NewGuid(),
+                    Content = a.Content,
+                    Votes = new List<Vote>()
+                }).ToList()
+            };
+
+            await _pollRepository.Add(poll);
+
+            var output = new PollCreatedViewModel
+            {
+                PollId = pollId.ToString(),
+                SecretCode = secret.Item1
+            };
+
+            return Ok(output);
         }
 
         /// <summary>
@@ -172,45 +185,55 @@ namespace Ancheta.WebApi.Controllers
         [RecaptchaValidation]
         public async Task<IActionResult> CastVote([FromRoute] string pollId, [FromQuery] string answerId)
         {
-            if (Guid.TryParse(pollId, out var id))
+            if (!Guid.TryParse(pollId, out var id))
             {
-                var poll = await _pollRepository.GetById(id);
-                if (poll == null) return NotFound();
+                ModelState.TryAddModelError("ParsingError", $"Poll ID {pollId} is not valid.");
+                return BadRequest(ModelState);
+            }
 
-                var addressBytes = HttpContext.Connection.RemoteIpAddress.MapToIPv4().GetAddressBytes();
+            var poll = await _pollRepository.GetById(id);
+            if (poll == null)
+            {
+                return NotFound();
+            }
 
-                if (!poll.AllowMultipleVotesPerIp)
+            var addressBytes = HttpContext.Connection.RemoteIpAddress.MapToIPv4().GetAddressBytes();
+
+            if (!poll.AllowMultipleVotesPerIp)
+            {
+                var votes = poll.Answers.SelectMany(s => s.Votes);
+                var sourceIpBytes = addressBytes;
+                if (votes.FirstOrDefault(v => v.Source.SequenceEqual(sourceIpBytes)) != null)
                 {
-                    var votes = poll.Answers.SelectMany(s => s.Votes);
-                    var sourceIpBytes = addressBytes;
-                    if (votes.FirstOrDefault(v => v.Source.SequenceEqual(sourceIpBytes)) != null)
-                    {
-                        return StatusCode(StatusCodes.Status403Forbidden);
-                    }
-                }
-
-                if (Guid.TryParse(answerId, out var answId))
-                {
-                    var answer = poll.Answers.FirstOrDefault(a => a.Id.Equals(answId));
-                    if (answer == null) return NotFound();
-
-                    var vote = new Vote
-                    {
-                        Id = Guid.NewGuid(),
-                        Source = addressBytes,
-                        CastedOn = DateTime.Now,
-                        OwnerAnswer = answer
-                    };
-
-                    await _voteRepository.Add(vote);
-
-                    _messengerHub.Publish(new VoteCastedMessage(poll.Id, answer.Id));
-
-                    return Ok();
+                    return StatusCode(StatusCodes.Status403Forbidden);
                 }
             }
 
-            return BadRequest();
+            if (!Guid.TryParse(answerId, out var answId))
+            {
+                ModelState.TryAddModelError("ParsingError", $"Answer ID {answerId} is not valid.");
+                return BadRequest(ModelState);
+            }
+
+            var answer = poll.Answers.FirstOrDefault(a => a.Id.Equals(answId));
+            if (answer == null)
+            {
+                return NotFound();
+            }
+
+            var vote = new Vote
+            {
+                Id = Guid.NewGuid(),
+                Source = addressBytes,
+                CastedOn = DateTime.Now,
+                OwnerAnswer = answer
+            };
+
+            await _voteRepository.Add(vote);
+
+            _messengerHub.Publish(new VoteCastedMessage(poll.Id, answer.Id));
+
+            return Ok();
         }
 
     }
