@@ -21,7 +21,7 @@ namespace Ancheta.Model.Services
             return (secretCode, hash);
         }
 
-        public bool IsPasswordValid(string secretCode, string hash)
+        public bool IsCodeValid(string secretCode, string hash)
         {
             if(string.IsNullOrEmpty(secretCode) || string.IsNullOrEmpty(hash)) return false;
             

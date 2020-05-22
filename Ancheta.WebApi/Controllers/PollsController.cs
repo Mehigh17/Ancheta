@@ -115,7 +115,7 @@ namespace Ancheta.WebApi.Controllers
                 return NotFound();
             }
 
-            var isAuthorized = _pollService.IsPasswordValid(secretCode, poll.SecretCodeHash);
+            var isAuthorized = _pollService.IsCodeValid(secretCode, poll.SecretCodeHash);
             if (!isAuthorized)
             {
                 return Unauthorized();

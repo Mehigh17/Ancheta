@@ -48,7 +48,7 @@ namespace Ancheta.WebApi.Tests
             var (password, hash) = _pollService.GenerateSecretCode(passLength);
 
             // Act
-            bool isValid = _pollService.IsPasswordValid(password, hash);
+            bool isValid = _pollService.IsCodeValid(password, hash);
 
             // Assert
             Assert.True(isValid);
@@ -62,7 +62,7 @@ namespace Ancheta.WebApi.Tests
             var (password, hash) = _pollService.GenerateSecretCode(passLength);
 
             // Act
-            bool isValid = _pollService.IsPasswordValid(password.Substring(0, passLength / 2), hash);
+            bool isValid = _pollService.IsCodeValid(password.Substring(0, passLength / 2), hash);
 
             // Assert
             Assert.False(isValid);
