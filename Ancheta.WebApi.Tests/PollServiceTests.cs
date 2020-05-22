@@ -15,7 +15,7 @@ namespace Ancheta.WebApi.Tests
         }
 
         [Fact]
-        public void GenerateScretCode_WithValidLength_ShouldReturn_PassHashPair()
+        public void GenerateSecretCode_WithValidLength_ShouldReturn_PassHashPair()
         {
             // Arrange
             const int length = 10;
