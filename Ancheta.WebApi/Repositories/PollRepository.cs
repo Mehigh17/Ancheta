@@ -7,7 +7,7 @@ using Ancheta.Model.Repositories;
 using Ancheta.WebApi.Contexts;
 using Microsoft.EntityFrameworkCore;
 
-namespace Ancheta.Repositories
+namespace Ancheta.WebApi.Repositories
 {
     public class PollRepository : IPollRepository
     {
