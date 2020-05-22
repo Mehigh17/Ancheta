@@ -5,8 +5,8 @@ namespace Ancheta.Model.Messages
 {
     public class VoteCastedMessage : ITinyMessage
     {
-        public Guid PollId { get; set; }
-        public Guid AnswerId { get; set; }
+        public Guid PollId { get; }
+        public Guid AnswerId { get; }
 
         public object Sender { get; }
 
