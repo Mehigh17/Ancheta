@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Ancheta.Model.Data;
 using Ancheta.Model.Messages;
@@ -141,16 +142,15 @@ namespace Ancheta.WebApi.Controllers
                 return BadRequest(ModelState);
             }
 
-            var secret = _pollService.GenerateSecretCode();
-            var pollId = Guid.NewGuid();
+            var (code, codeHash) = _pollService.GenerateSecretCode();
             var poll = new Poll
             {
-                Id = pollId,
+                Id = Guid.NewGuid(),
                 Question = model.Question,
                 CreatedOn = DateTime.Now,
                 Duration = model.Duration.HasValue ? TimeSpan.FromSeconds(model.Duration.Value) : default(TimeSpan?),
                 IsPublic = model.IsPublic,
-                SecretCodeHash = secret.Item2,
+                SecretCodeHash = codeHash,
                 AllowMultipleVotesPerIp = model.AllowMultipleVotesPerIp,
                 Answers = model.Answers.Select(a => new Answer
                 {
@@ -164,8 +164,8 @@ namespace Ancheta.WebApi.Controllers
 
             var output = new PollCreatedViewModel
             {
-                PollId = pollId.ToString(),
-                SecretCode = secret.Item1
+                PollId = poll.Id.ToString(),
+                SecretCode = code
             };
 
             return Ok(output);
@@ -180,6 +180,7 @@ namespace Ancheta.WebApi.Controllers
         /// <response code="400">If the poll or answer id are in invalid formats.</response>   
         /// <response code="403">If the user has already voted before.</response>
         /// <response code="404">If the poll or answer are not found.</response>
+        /// <response code="410">If the poll's duration has expired.</response>
         /// <returns></returns>
         [HttpPost("{pollId}/votes")]
         [RecaptchaValidation]
@@ -219,6 +220,12 @@ namespace Ancheta.WebApi.Controllers
             if (answer == null)
             {
                 return NotFound();
+            }
+
+            if (poll.Duration != null && poll.CreatedOn.Add(poll.Duration.Value) < DateTime.Now)
+            {
+                // Poll is expired
+                return StatusCode((int) HttpStatusCode.Gone);
             }
 
             var vote = new Vote
